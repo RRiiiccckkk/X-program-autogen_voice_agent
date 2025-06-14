@@ -1,0 +1,8 @@
+[
+    {
+        "model": "gpt-3.5-turbo",
+        "api_key": "doQoKm7g3U4Bw",
+        "base_url": "https://ai.liaobots.work/v1",
+        "api_type": "openai"
+    }
+]
