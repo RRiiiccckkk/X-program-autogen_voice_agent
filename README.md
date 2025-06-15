@@ -2,15 +2,15 @@
 
 [中文文档](docs/README_CN.md) | [日本語](docs/README_JP.md)
 
-A powerful multi-agent collaborative system built with Microsoft AutoGen framework, featuring advanced language models (o3-2025-04-16, o4-mini) and integrated web search capabilities.
+A powerful multi-agent collaborative system built with Microsoft AutoGen framework, featuring advanced language models (such as o3-2025-04-16, o4-mini) and integrated web search capabilities.
 
 ## ✨ Key Features
 
 ### 🤖 Five-Agent Collaborative Architecture
-- **Planner Agent** (o3-2025-04-16): Deep problem understanding and strategic planning
-- **Executor Agent** (o3-2025-04-16): Code execution and web search capabilities
-- **Summarizer Agent** (o4-mini): Content reorganization and formatting
-- **Reviewer Agent** (gpt-4o-2024-11-20): Quality assurance and feedback
+- **Planner Agent** : Deep problem understanding and strategic planning
+- **Executor Agent** : Code execution and web search capabilities
+- **Summarizer Agent** : Content reorganization and formatting
+- **Reviewer Agent** : Quality assurance and feedback
 - **User Proxy**: Interaction management and flow control
 
 ### 🌐 Integrated Web Search
@@ -52,21 +52,21 @@ Create or edit `OAI_CONFIG_LIST` file:
 ```json
 [
     {
-        "model": "gpt-4o-2024-11-20",
+        "model": "OPENAI_MODEL",
         "api_key": "YOUR_API_KEY",
-        "base_url": "https://api.openai.com/v1",
+        "base_url": "YOUR_API_PROVIDER",
         "api_type": "openai"
     },
     {
-        "model": "o3-2025-04-16",
+        "model": "OPEN_AI_MODEL",
         "api_key": "YOUR_API_KEY",
-        "base_url": "https://api.openai.com/v1",
+        "base_url": "YOUR_API_PROVIDER",
         "api_type": "openai"
     },
     {
-        "model": "o4-mini",
+        "model": "OPEN_AI_MODEL",
         "api_key": "YOUR_API_KEY",
-        "base_url": "https://api.openai.com/v1",
+        "base_url": "YOUR_API_PORVIDER",
         "api_type": "openai"
     }
 ]
