@@ -1,6 +1,18 @@
 [
     {
-        "model": "gpt-3.5-turbo",
+        "model": "gpt-4o-2024-11-20",
+        "api_key": "doQoKm7g3U4Bw",
+        "base_url": "https://ai.liaobots.work/v1",
+        "api_type": "openai"
+    },
+    {
+        "model": "o3-2025-04-16",
+        "api_key": "doQoKm7g3U4Bw",
+        "base_url": "https://ai.liaobots.work/v1",
+        "api_type": "openai"
+    },
+    {
+        "model": "o4-mini",
         "api_key": "doQoKm7g3U4Bw",
         "base_url": "https://ai.liaobots.work/v1",
         "api_type": "openai"

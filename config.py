@@ -26,3 +26,33 @@ def load_llm_config(config_file="OAI_CONFIG_LIST", model_filter=None):
     except Exception as e:
         print(f"加载 LLM 配置时发生错误: {e}")
         return []
+
+def load_executor_config(config_file="OAI_CONFIG_LIST"):
+    """
+    专门为执行者智能体加载 o3-2025-04-16 模型配置。
+    Args:
+        config_file (str): 包含 LLM 配置的 JSON 文件路径。
+    Returns:
+        list: o3 模型的配置列表。
+    """
+    return load_llm_config(config_file, model_filter=["o3-2025-04-16"])
+
+def load_summarizer_config(config_file="OAI_CONFIG_LIST"):
+    """
+    专门为总结者智能体加载 o4-mini 模型配置。
+    Args:
+        config_file (str): 包含 LLM 配置的 JSON 文件路径。
+    Returns:
+        list: o4-mini 模型的配置列表。
+    """
+    return load_llm_config(config_file, model_filter=["o4-mini"])
+
+def load_planner_config(config_file="OAI_CONFIG_LIST"):
+    """
+    专门为规划者智能体加载 o3-2025-04-16 模型配置。
+    Args:
+        config_file (str): 包含 LLM 配置的 JSON 文件路径。
+    Returns:
+        list: o3 模型的配置列表。
+    """
+    return load_llm_config(config_file, model_filter=["o3-2025-04-16"])

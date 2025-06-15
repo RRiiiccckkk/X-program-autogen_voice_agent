@@ -1,0 +1,27 @@
+# Core dependencies
+pyautogen>=0.2.0
+openai>=1.0.0
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+
+# Web scraping and parsing
+lxml>=4.9.0
+
+# Optional: Audio processing (for voice features)
+# Uncomment if you plan to use voice features
+# torch>=2.0.0
+# torchaudio>=2.0.0
+# transformers>=4.30.0
+# whisper-openai>=20230314
+
+# Optional: Google AI support
+# Uncomment if using Google's API
+# google-genai
+# vertexai
+
+# Development and testing
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+
+# System utilities
+pathlib2>=2.3.0; python_version < "3.4"

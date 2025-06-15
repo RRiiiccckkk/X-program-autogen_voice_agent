@@ -1,77 +1,209 @@
-# Autogen 语音对话代理
+# AutoGen Multi-Agent Voice Assistant
 
-本项目旨在实现一个基于 Autogen 框架的实时语音对话系统，集成了语音识别 (ASR) 和语音合成 (TTS) 功能。
+[中文文档](docs/README_CN.md) | [日本語](docs/README_JP.md)
 
-## 功能特性
+A powerful multi-agent collaborative system built with Microsoft AutoGen framework, featuring advanced language models (o3-2025-04-16, o4-mini) and integrated web search capabilities.
 
-*   **语音识别 (ASR)**: 利用本地的 `models--ope...-whisper-base` 模型将语音输入转换为文本。
-*   **大语言模型 (LLM) 交互**: 通过 `Autogen` 框架与 `liaobots.work` 提供的 `OpenAI compatible API` 进行交互，实现智能对话。
-*   **语音合成 (TTS)**: (待集成) 使用 `edge-tts` 库将文本回复转换为语音输出。
+## ✨ Key Features
 
-## 环境准备
+### 🤖 Five-Agent Collaborative Architecture
+- **Planner Agent** (o3-2025-04-16): Deep problem understanding and strategic planning
+- **Executor Agent** (o3-2025-04-16): Code execution and web search capabilities
+- **Summarizer Agent** (o4-mini): Content reorganization and formatting
+- **Reviewer Agent** (gpt-4o-2024-11-20): Quality assurance and feedback
+- **User Proxy**: Interaction management and flow control
 
-### 1. Python 环境
+### 🌐 Integrated Web Search
+- DuckDuckGo search (no API key required)
+- Wikipedia knowledge base
+- Real-time news search
+- Web content extraction
+- Currency exchange rates
+- Automatic source selection
 
-确保您的系统已安装 Python 3.9 或更高版本。建议使用 `conda` 或 `venv` 创建虚拟环境。
+### 🚀 Cross-Platform Support
+- **Windows**: Native batch scripts and PowerShell support
+- **macOS**: One-click `.command` launcher
+- **Linux**: Shell script compatibility
 
+## 📋 Requirements
+
+- Python 3.8 or higher
+- pip package manager
+- Internet connection (for web search features)
+
+## 🛠️ Installation
+
+### 1. Clone the repository
 ```bash
-conda create -n autogen_voice python=3.11
-conda activate autogen_voice
+git clone https://github.com/RRiiiccckkk/X-program-autogen_voice_agent.git
+cd autogen_voice_agent
 ```
 
-### 2. 安装依赖
-
+### 2. Install dependencies
 ```bash
 pip install -r requirements.txt
-pip install openai autogen pyautogen transformers torchaudio whisper-openai # whisper-openai 是为了兼容老的 `openai-whisper` 包
-pip install google-genai vertexai
 ```
 
-### 3. 配置 LLM API
+### 3. Configure API
 
-编辑 `autogen_voice_agent/OAI_CONFIG_LIST` 文件，配置您的 API 密钥和模型信息。
+Create or edit `OAI_CONFIG_LIST` file:
 
 ```json
 [
     {
-        "model": "gpt-3.5-turbo",
-        "api_key": "YOUR_LIAOBOTS_API_KEY", 
-        "base_url": "https://ai.liaobots.work/v1",
+        "model": "gpt-4o-2024-11-20",
+        "api_key": "YOUR_API_KEY",
+        "base_url": "https://api.openai.com/v1",
+        "api_type": "openai"
+    },
+    {
+        "model": "o3-2025-04-16",
+        "api_key": "YOUR_API_KEY",
+        "base_url": "https://api.openai.com/v1",
+        "api_type": "openai"
+    },
+    {
+        "model": "o4-mini",
+        "api_key": "YOUR_API_KEY",
+        "base_url": "https://api.openai.com/v1",
         "api_type": "openai"
     }
 ]
 ```
-请将 `YOUR_LIAOBOTS_API_KEY` 替换为您在 `liaobots.work` 获取的 API 密钥。
 
-## 运行项目
+### 🔑 API Flexibility
 
-1.  **启动 `app.py`**:
-    ```bash
-    python autogen_voice_agent/app.py
-    ```
+This system supports **any OpenAI-compatible API service**. While we recommend using the OpenAI format for best compatibility, you can use:
 
-2.  **进行语音输入**:
-    程序将自动录制 5 秒的音频。请对着麦克风说话。
+- **OpenAI** (official)
+- **Azure OpenAI**
+- **LiaoBots** 
+- **Local deployments** (LM Studio, Ollama, etc.)
+- **Any OpenAI-compatible service**
 
-3.  **查看对话**:
-    程序会将您的语音转录为文本，并发送给大语言模型获取回复。回复将显示在终端中。
+Simply adjust the `base_url` and `api_key` in your configuration.
 
-## 故障排除
+## 🚀 Quick Start
 
-*   **`ImportError: Please install google-genai and 'vertexai' to use Google's API.`**:
-    这是因为您的 `OAI_CONFIG_LIST` 配置中 `api_type` 设置为 `google`，但缺少 `google-genai` 和 `vertexai` 库。
-    解决方案：执行 `pip install google-genai vertexai`，或者将 `api_type` 设置为 `openai`。
+### macOS Users
+Double-click `start_mac.command` to launch the system.
 
-*   **`openai.BadRequestError: Error code: 400 - {'error': {'message': 'Unable to submit request because it must include at least one parts field...`**:
-    这通常发生在您使用 `gemini` 系列模型，但 `autogen` 在发送请求时缺少必要的 `parts` 字段。
-    解决方案：
-    1.  确认 `OAI_CONFIG_LIST` 中的 `api_type` 已设置为 `openai`。
-    2.  如果问题依然存在，可以尝试将模型暂时切换为 `gpt-3.5-turbo`。这可能表示 `liaobots.work` 对 `gemini` 模型的兼容性可能存在细微差异。
+### Windows Users
+Double-click `start.bat` to launch the system.
 
-## 贡献
+### Linux/Advanced Users
+```bash
+# Run with full checks
+python3 start.py
 
-欢迎通过提交 Pull Request 来贡献代码或报告问题。
+# Run directly
+python3 app.py
 
-## 许可证
+# Run tests only
+python3 start.py --test
+```
 
-本项目采用 MIT 许可证。
+## 💡 Usage Examples
+
+### Basic Questions
+- "What is machine learning?"
+- "Search for the latest AI trends"
+- "What's the weather like today?"
+
+### Web Search
+- "Search for Python best practices"
+- "Find news about OpenAI"
+- "What's the USD to CNY exchange rate?"
+
+### Complex Tasks
+- "Search for machine learning algorithms and write a simple implementation"
+- "Find information about quantum computing and create a presentation outline"
+- "Research current AI trends and summarize the key findings"
+
+## 🏗️ System Architecture
+
+```
+User Input → Planner → Executor → Summarizer → Reviewer → User Output
+                ↓          ↓          ↓            ↓
+            Planning   Execution  Formatting  Quality Check
+```
+
+## 📁 Project Structure
+
+```
+autogen_voice_agent/
+├── app.py                 # Main application
+├── config.py              # Configuration management
+├── tools.py               # Web search tools
+├── start.py               # Smart launcher
+├── start_mac.command      # macOS launcher
+├── start.bat              # Windows launcher
+├── run.sh                 # Linux/Unix launcher
+├── test_*.py              # Test suites
+├── docs/                  # Documentation
+│   ├── WINDOWS_GUIDE.md
+│   ├── LINUX_GUIDE.md
+│   └── MACOS_GUIDE.md
+└── examples/              # Usage examples
+```
+
+## 🧪 Testing
+
+Run all tests:
+```bash
+python3 test_model_config.py
+python3 unit_test.py
+python3 test_web_search.py
+```
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+1. **API Connection Error**
+   - Check your internet connection
+   - Verify API keys and endpoints
+   - Ensure the API service is compatible with OpenAI format
+
+2. **Model Not Found**
+   - Verify model names in OAI_CONFIG_LIST
+   - Check if your API provider supports the requested models
+
+3. **Web Search Failed**
+   - Check internet connectivity
+   - Some searches may be rate-limited
+
+For detailed platform-specific guides, see:
+- [Windows Guide](docs/WINDOWS_GUIDE.md)
+- [Linux Guide](docs/LINUX_GUIDE.md)
+- [macOS Guide](docs/MACOS_GUIDE.md)
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Microsoft AutoGen team for the excellent framework
+- OpenAI for the powerful language models
+- Community contributors
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/RRiiiccckkk/X-program-autogen_voice_agent/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/RRiiiccckkk/X-program-autogen_voice_agent/discussions)
+
+---
+
+Made with ❤️ by Rick | [GitHub](https://github.com/RRiiiccckkk)
