@@ -3,6 +3,18 @@
 [中文文档](docs/README_CN.md) | [日本語](docs/README_JP.md)
 
 A powerful multi-agent collaborative system built with Microsoft AutoGen framework, featuring advanced language models (such as o3-2025-04-16, o4-mini) and integrated web search capabilities.
+flowchart LR
+    subgraph VoicePipeline
+        Mic -->|Audio Chunk| STT
+        STT -->|Text| ChatCore
+        ChatCore -->|Reply Text| TTS
+        TTS -->|Audio Out| Speaker
+    end
+
+    subgraph ChatCore
+        user_proxy --> planner --> executor --> summarizer --> reviewer --> user_proxy
+    end
+
 
 ## ✨ Key Features
 
