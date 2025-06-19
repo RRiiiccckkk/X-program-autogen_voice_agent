@@ -6,6 +6,13 @@ A powerful multi-agent collaborative system built with Microsoft AutoGen framewo
 
 ## ✨ Key Features
 
+### 🎙️ Voice Interaction (NEW!)
+- **Speech Recognition**: Powered by OpenAI Whisper (runs locally)
+- **Text-to-Speech**: System TTS support (macOS/Linux)
+- **Dual Mode**: Switch between voice and text interaction
+- **Real-time Processing**: Instant voice-to-text conversion
+- **Multi-language**: Primary support for Chinese, also handles English
+
 ### 🤖 Five-Agent Collaborative Architecture
 - **Planner Agent** (o3-2025-04-16): Deep problem understanding and strategic planning
 - **Executor Agent** (o3-2025-04-16): Code execution and web search capabilities
@@ -19,6 +26,7 @@ A powerful multi-agent collaborative system built with Microsoft AutoGen framewo
 - Real-time news search
 - Web content extraction
 - Currency exchange rates
+- Weather information
 - Automatic source selection
 
 ### 🚀 Cross-Platform Support
@@ -86,13 +94,44 @@ Simply adjust the `base_url` and `api_key` in your configuration.
 
 ## 🚀 Quick Start
 
-### macOS Users
-Double-click `start_mac.command` to launch the system.
+### 🎯 GUI Launcher (v3.0) - RECOMMENDED
+The easiest way to start the system with a graphical interface:
 
-### Windows Users
-Double-click `start.bat` to launch the system.
+#### macOS
+Double-click `launch_mac.command`
 
-### Linux/Advanced Users
+#### Windows  
+Double-click `launch_win.bat`
+
+#### Linux
+```bash
+chmod +x launch_linux.sh  # First time only
+./launch_linux.sh
+```
+
+The GUI launcher provides three modes:
+- **🎯 Demo Mode** - View system demonstrations
+- **⌨️ Text Mode** - Keyboard-based interaction
+- **🎙️ Voice Mode** - Speech-based interaction
+
+### Command Line Options
+```bash
+# Start with voice/text mode selection
+python3 start_voice.py
+
+# Direct voice mode
+python3 start_voice.py --mode voice
+
+# Direct text mode
+python3 start_voice.py --mode text
+
+# Specify Whisper model size
+python3 start_voice.py --model tiny   # Fast but less accurate
+python3 start_voice.py --model base   # Balanced
+python3 start_voice.py --model small  # More accurate
+```
+
+### Traditional Launch
 ```bash
 # Run with full checks
 python3 start.py
@@ -137,14 +176,22 @@ autogen_voice_agent/
 ├── config.py              # Configuration management
 ├── tools.py               # Web search tools
 ├── start.py               # Smart launcher
+├── start_voice.py         # Voice-enabled launcher
 ├── start_mac.command      # macOS launcher
 ├── start.bat              # Windows launcher
 ├── run.sh                 # Linux/Unix launcher
 ├── test_*.py              # Test suites
+├── voice/                 # Voice modules
+│   ├── __init__.py
+│   ├── stt.py            # Speech-to-text (Whisper)
+│   ├── tts.py            # Text-to-speech
+│   ├── audio_io.py       # Audio recording/playback
+│   └── voice_session.py  # Voice interaction manager
 ├── docs/                  # Documentation
 │   ├── WINDOWS_GUIDE.md
 │   ├── LINUX_GUIDE.md
-│   └── MACOS_GUIDE.md
+│   ├── MACOS_GUIDE.md
+│   └── VOICE_GUIDE.md    # Voice feature guide
 └── examples/              # Usage examples
 ```
 
@@ -155,6 +202,7 @@ Run all tests:
 python3 test_model_config.py
 python3 unit_test.py
 python3 test_web_search.py
+python3 test_whisper_integration.py  # Voice feature test
 ```
 
 ## 🐛 Troubleshooting

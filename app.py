@@ -1,7 +1,7 @@
 import autogen
 import os
 from config import load_llm_config, load_executor_config, load_summarizer_config, load_planner_config
-from tools import search_web, search_duckduckgo, search_wikipedia, search_news, extract_webpage_content, get_exchange_rate
+from tools import search_web, search_duckduckgo, search_wikipedia, search_news, extract_webpage_content, get_exchange_rate, get_weather
 
 # 配置智能体，从 config.py 加载模型配置
 config_list = load_llm_config(model_filter=["gpt-4o-2024-11-20"])
@@ -13,15 +13,15 @@ planner_config_list = load_planner_config()
 if not planner_config_list:
     raise ValueError("规划者 o3 模型配置加载失败，请检查 OAI_CONFIG_LIST 配置。")
 
-# 为执行者加载 o3 模型配置
-executor_config_list = load_executor_config()
-if not executor_config_list:
-    raise ValueError("执行者 o3 模型配置加载失败，请检查 OAI_CONFIG_LIST 配置。")
-
 # 为总结者加载 o4-mini 模型配置
 summarizer_config_list = load_summarizer_config()
 if not summarizer_config_list:
     raise ValueError("总结者 o4-mini 模型配置加载失败，请检查 OAI_CONFIG_LIST 配置。")
+
+# 为执行者加载 gpt-4o-2024-11-20 模型配置（支持函数调用）
+executor_config_list = load_executor_config()
+if not executor_config_list:
+    raise ValueError("执行者 gpt-4o-2024-11-20 模型配置加载失败，请检查 OAI_CONFIG_LIST 配置。")
 
 # 通用 LLM 配置（用于反馈者）
 llm_config = {
@@ -35,7 +35,7 @@ planner_llm_config = {
     "temperature": 0.1,  # 稍高的温度以提高分析创造性
 }
 
-# 执行者专用 LLM 配置（使用 o3 模型）
+# 执行者专用 LLM 配置（使用 o4-mini 模型，支持函数调用）
 executor_llm_config = {
     "config_list": executor_config_list,
     "temperature": 0,
@@ -142,6 +142,25 @@ executor_llm_config = {
                 },
                 "required": ["base_currency", "target_currency"]
             }
+        },
+        {
+            "name": "get_weather",
+            "description": "获取指定城市的实时天气信息（调用 wttr.in 或备用搜索引擎）",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "location": {
+                        "type": "string",
+                        "description": "城市名称（支持中文、英文），如 '广州'、'Beijing'、'上海'"
+                    },
+                    "lang": {
+                        "type": "string",
+                        "description": "语言代码，默认 'zh' 中文",
+                        "default": "zh"
+                    }
+                },
+                "required": ["location"]
+            }
         }
     ]
 }
@@ -189,10 +208,10 @@ When planning is complete, say "PLAN_COMPLETE" to indicate completion.""",
     llm_config=planner_llm_config,
 )
 
-# 定义执行者智能体（使用 o3-2025-04-16 模型）
+# 定义执行者智能体（使用 o4-mini 模型）
 executor = autogen.AssistantAgent(
     name="executor",
-    system_message="""You are a Code Execution Expert powered by the advanced o3-2025-04-16 model with web search capabilities. Think in English for superior technical reasoning, but respond in Chinese.
+    system_message="""You are a Code Execution Expert powered by o4-mini with web search capabilities. Think in English for superior technical reasoning, but respond in Chinese.
 
 Your core responsibilities:
 1. Execute tasks based on the planner's detailed plan
@@ -208,6 +227,9 @@ Available web search tools:
 - search_news(query): Latest news search
 - extract_webpage_content(url, max_length): Extract content from specific webpages
 - get_exchange_rate(base_currency, target_currency): Get currency exchange rates
+- get_weather(location, lang): Get real-time weather for any city (uses wttr.in API)
+
+IMPORTANT: When user asks for weather information, always use get_weather() function first to get real-time data. Do NOT provide example or mock weather data.
 
 Technical approach:
 - Determine if web search is needed based on the task
@@ -302,15 +324,93 @@ user_proxy = autogen.UserProxyAgent(
         "search_news": search_news,
         "extract_webpage_content": extract_webpage_content,
         "get_exchange_rate": get_exchange_rate,
+        "get_weather": get_weather,
     }
 )
+
+def filter_messages_for_agent(messages, agent_name):
+    """为特定智能体过滤消息，移除不兼容的消息格式"""
+    filtered_messages = []
+    
+    for msg in messages:
+        # 跳过 function role 的消息，这些消息某些模型不支持
+        if msg.get("role") == "function":
+            continue
+            
+        # 对于包含函数调用结果的消息，转换为普通文本消息
+        content = msg.get("content", "")
+        if content and "***** Response from calling function" in content:
+            # 提取函数调用的结果部分
+            lines = content.split('\n')
+            result_lines = []
+            in_result = False
+            for line in lines:
+                if line.startswith("***** Response from calling function"):
+                    in_result = True
+                    continue
+                elif line.startswith("*" * 50):
+                    in_result = False
+                    continue
+                elif in_result:
+                    result_lines.append(line)
+            
+            if result_lines:
+                # 创建一个新的消息，只包含函数执行结果
+                filtered_msg = {
+                    "role": "assistant" if msg.get("name") == "user_proxy" else msg.get("role", "user"),
+                    "content": "\n".join(result_lines).strip(),
+                    "name": msg.get("name", "")
+                }
+                filtered_messages.append(filtered_msg)
+        else:
+            # 确保所有消息都有有效的 content
+            if content or msg.get("role") == "system":
+                filtered_msg = dict(msg)
+                if not filtered_msg.get("content"):
+                    filtered_msg["content"] = "继续处理..."
+                filtered_messages.append(filtered_msg)
+    
+    return filtered_messages
+
+def custom_speaker_selection_func(last_speaker, groupchat):
+    """优化的发言者选择函数，更好地处理函数调用场景"""
+    messages = groupchat.messages
+    
+    # 检查最近的消息中是否有function相关的内容
+    has_function_call = False
+    has_function_response = False
+    
+    for msg in messages[-3:]:  # 检查最近3条消息
+        content = msg.get("content", "")
+        if "***** Suggested function call" in content:
+            has_function_call = True
+        elif "***** Response from calling function" in content:
+            has_function_response = True
+    
+    # 基本的发言顺序
+    if last_speaker is user_proxy:
+        return planner
+    elif last_speaker is planner:
+        return executor
+    elif last_speaker is executor:
+        # 如果执行者刚调用了函数并得到了响应，直接让反馈者总结
+        if has_function_response:
+            return reviewer
+        else:
+            return summarizer
+    elif last_speaker is summarizer:
+        return reviewer
+    elif last_speaker is reviewer:
+        return None  # 结束对话
+    else:
+        return planner
 
 # 创建群聊（添加总结者到工作流程中）
 groupchat = autogen.GroupChat(
     agents=[user_proxy, planner, executor, summarizer, reviewer],
     messages=[],
     max_round=40,  # 增加轮次以适应新的工作流程
-    speaker_selection_method="auto",
+    speaker_selection_method=custom_speaker_selection_func,
 )
 
 # 创建群聊管理器

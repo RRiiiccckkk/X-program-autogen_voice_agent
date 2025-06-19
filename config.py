@@ -1,14 +1,13 @@
 import autogen
 import os
 
-def load_llm_config(config_file="OAI_CONFIG_LIST", model_filter=None):
+def load_default_config(config_file="OAI_CONFIG_LIST"):
     """
-    从指定的配置文件加载 LLM 配置。
+    加载默认的 LLM 配置，统一使用 gpt-4o-2024-11-20 模型。
     Args:
         config_file (str): 包含 LLM 配置的 JSON 文件路径。
-        model_filter (list): 用于筛选模型的列表，例如 ["gemini-2.5-flash-preview-05-20"]。
     Returns:
-        list: 过滤后的 LLM 配置列表。
+        list: gpt-4o-2024-11-20 模型的配置列表。
     """
     # 获取当前文件 (config.py) 的目录
     current_dir = os.path.dirname(__file__)
@@ -17,42 +16,29 @@ def load_llm_config(config_file="OAI_CONFIG_LIST", model_filter=None):
 
     try:
         config_list = autogen.config_list_from_json(
-            full_config_path, # 使用完整路径
-            filter_dict={"model": model_filter} if model_filter else None,
+            full_config_path,
+            filter_dict={"model": ["gpt-4o-2024-11-20"]},
         )
         if not config_list:
-            raise ValueError(f"在 {full_config_path} 中未找到与过滤器 {model_filter} 匹配的模型配置。")
+            raise ValueError(f"在 {full_config_path} 中未找到 gpt-4o-2024-11-20 模型配置。")
         return config_list
     except Exception as e:
         print(f"加载 LLM 配置时发生错误: {e}")
         return []
 
+# 保持向后兼容性的别名
+def load_llm_config(config_file="OAI_CONFIG_LIST", model_filter=None):
+    """向后兼容性函数"""
+    return load_default_config(config_file)
+
 def load_executor_config(config_file="OAI_CONFIG_LIST"):
-    """
-    专门为执行者智能体加载 o3-2025-04-16 模型配置。
-    Args:
-        config_file (str): 包含 LLM 配置的 JSON 文件路径。
-    Returns:
-        list: o3 模型的配置列表。
-    """
-    return load_llm_config(config_file, model_filter=["o3-2025-04-16"])
+    """向后兼容性函数"""
+    return load_default_config(config_file)
 
 def load_summarizer_config(config_file="OAI_CONFIG_LIST"):
-    """
-    专门为总结者智能体加载 o4-mini 模型配置。
-    Args:
-        config_file (str): 包含 LLM 配置的 JSON 文件路径。
-    Returns:
-        list: o4-mini 模型的配置列表。
-    """
-    return load_llm_config(config_file, model_filter=["o4-mini"])
+    """向后兼容性函数"""
+    return load_default_config(config_file)
 
 def load_planner_config(config_file="OAI_CONFIG_LIST"):
-    """
-    专门为规划者智能体加载 o3-2025-04-16 模型配置。
-    Args:
-        config_file (str): 包含 LLM 配置的 JSON 文件路径。
-    Returns:
-        list: o3 模型的配置列表。
-    """
-    return load_llm_config(config_file, model_filter=["o3-2025-04-16"])
+    """向后兼容性函数"""
+    return load_default_config(config_file)
